@@ -21,7 +21,7 @@ After=network-online.target
 
 [Service]
 User=root
-ExecStart=/usr/sbin/swapoff
+ExecStart=/usr/sbin/swapoff -a
 
 [Install]
 WantedBy=multi-user.target
