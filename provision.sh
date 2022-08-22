@@ -10,24 +10,39 @@ apt install -y mlocate
 
 # kubernetes is neeed to swap off
 # disable swap
+
+# 即時にswapoff, kubernetes installのため、
 swapoff -a
+
 # swapdisk時代をコメントアウトしておくと、使われなくなる。
-# [](https://docs.oracle.com/cd/F33069_01/start/swap.html)
+# [oracle ドキュメント](https://docs.oracle.com/cd/F33069_01/start/swap.html)
+swap_row_num=$(cat /etc/fstab | \
+    tr '\t' ' ' | \
+    sed 's/ \+/ /g' | \
+    awk '{
+        # 3列目にswapが指定されていて、コメント行で無いものの行番号取得
+        if($3=="swap" && "#"!=substr($1, 1, 1)){
+            print NR
+        }
+    }'
+)
+sed -i.org "${swap_row_num}s/^/# /" /etc/fstab
 
-cat << END >> /etc/systemd/system/swapoff.service
-[Unit]
-Description=swapoff for k8s running.
-After=network-online.target
+# systemdで設定するぐらいならスワップディスク無効か、swapon swapoff動的に打つほうがマシ。
+# cat << END >> /etc/systemd/system/swapoff.service
+# [Unit]
+# Description=swapoff for k8s running.
+# After=network-online.target
 
-[Service]
-User=root
-ExecStart=/usr/sbin/swapoff -a
+# [Service]
+# User=root
+# ExecStart=/usr/sbin/swapoff -a
 
-[Install]
-WantedBy=multi-user.target
-END
+# [Install]
+# WantedBy=multi-user.target
+# END
 
-systemctl enable swapoff.service
+# systemctl enable swapoff.service
 
 # install dependency on crio
 apt install -y \
