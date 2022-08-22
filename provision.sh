@@ -82,7 +82,7 @@ sudo apt-mark hold kubelet kubeadm kubectl
 
 # localhostをadmin, master, workerとして実行
 # /etc/kubernetes/admin.confなどを作作すす。
-kubeadm init
+kubeadm init  --kubernetes-version=v1.24.4
 
 # defaultはvagrant
 user=$(cat /etc/passwd | awk -F: '{if($3==1000){print $1}}')
